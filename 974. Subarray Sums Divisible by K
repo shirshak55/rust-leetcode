@@ -1,0 +1,67 @@
+# 974. Subarray Sums Divisible by K
+
+Given an array A of integers, return the number of (contiguous, non-empty) subarrays that have a sum divisible by K.
+
+ 
+
+Example 1:
+
+Input: A = [4,5,0,-2,-3,1], K = 5
+Output: 7
+Explanation: There are 7 subarrays with a sum divisible by K = 5:
+[4, 5, 0, -2, -3, 1], [5], [5, 0], [5, 0, -2, -3], [0], [0, -2, -3], [-2, -3]
+ 
+
+Note:
+
+1 <= A.length <= 30000
+-10000 <= A[i] <= 10000
+2 <= K <= 10000
+
+```rust
+
+fn main() {
+    let counts = count_sub_array_sum_divisible_by_n(&[4, 5, 0, -2, -3, 1], 5);
+    println!("{}", counts);
+}
+
+fn count_sub_array_sum_divisible_by_n(input: &[isize], n: isize) -> isize {
+    use std::collections::HashMap;
+    let mut counts: isize = 0;
+    let mut cum_sum: Vec<isize> = Vec::with_capacity(input.len());
+    cum_sum.push(0);
+    let mut mods_count: HashMap<&isize, isize> = HashMap::new();
+
+    input.iter().fold(0, |acc, x| {
+        let sum = acc + x;
+        cum_sum.push(sum);
+        sum
+    });
+
+    let mod_sum_iter = cum_sum.iter().map(|x| x % n).collect::<Vec<isize>>();
+    mod_sum_iter.iter().for_each(|a: &isize| {
+        match mods_count.get_mut(a) {
+            Some(&mut value) => {
+                mods_count.insert(a, value + 1);
+            }
+            None => {
+                mods_count.insert(a, 1);
+            }
+        };
+    });
+
+    use factorial::Factorial;
+
+    for (_, v) in mods_count {
+        if v < 2 {
+            continue;
+        }
+        let n_fact = (v as usize).checked_factorial().unwrap() as isize;
+        let diff_fact = ((v - 2) as usize).checked_factorial().unwrap() as isize;
+        counts += n_fact / (diff_fact * 2)
+    }
+
+    counts
+}
+
+```
